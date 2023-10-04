@@ -1,0 +1,15 @@
+name: cicu-vehicle-tracking
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python
+  - numpy
+  - opencv
+# - imutils
+  - pytorch
+# - pandas
+  - tensorflow
+  - torchvision
+  - ultralytics
