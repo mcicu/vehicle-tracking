@@ -9,3 +9,6 @@ conda activate <env_name>
 
 # update the env using a new environment.yml file
 conda env update --file environment.yml --prune
+
+# on windows: need to install opencv with pip:
+pip install opencv-python
