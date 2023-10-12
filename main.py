@@ -100,9 +100,7 @@ def main():
     model = YOLO("yolov8n.pt")
 
     # Open the video file
-    # video_path = "radu-road.mp4"
-    # video_path = "0911.mp4"
-    video_path = "road5sec.mp4"
+    video_path = "road.mp4"
     capture = cv2.VideoCapture(video_path)
 
     video_path_without_extension = os.path.splitext(video_path)[0]
