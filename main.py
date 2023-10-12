@@ -69,7 +69,7 @@ def draw_user_areas(frame, detection_areas):
             "Area " + str(area_index),
             (area["center"][0]-25, area["center"][1]),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
+            0.8,
             (255, 255, 255),
             2,
         )
@@ -83,14 +83,16 @@ def compute_results_and_write_to_file(detected_vehicles, filename):
         vehicle_type = detected_vehicle["vehicle_type"]
         if result_per_direction.get(direction) is None:
             vehicles_types_count_0_dictionary = {k:0 for k in vehicle_type_names}
-            result_per_direction[direction] = {"direction": direction} | vehicles_types_count_0_dictionary
+            result_per_direction[direction] = {"direction": direction, "total": 0} | vehicles_types_count_0_dictionary
         result_per_direction[direction][vehicle_type] += 1
+        result_per_direction[direction]["total"] += 1
 
     with open(filename, "w") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=["direction"] + vehicle_type_names)
+        writer = csv.DictWriter(csvfile, fieldnames=["direction", "total"] + vehicle_type_names)
         writer.writeheader()
-        for result in result_per_direction.values():
-            writer.writerow(result)
+        # write results sorted by vehicle total (descending)
+        for k, v in sorted(result_per_direction.items(), key=lambda item: item[1]["total"], reverse=True):
+            writer.writerow(v)
 
 
 def main():
@@ -106,8 +108,8 @@ def main():
     video_path_without_extension = os.path.splitext(video_path)[0]
     total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     current_frame_count = 0
-    frame_step = 3
-    file_output_frame_step = 10000
+    frame_step = 2
+    file_output_frame_step = 5000
     detected_vehicles = dict()
 
     # canvas state parameters, shared with mouse callback function
@@ -172,7 +174,7 @@ def main():
             # Process detected vehicles in the current frame, and save/update info about them
             for x1, y1, x2, y2, track_id, score, vehicle_type_id in results[0].boxes.data.numpy():
                 # draw green dot on bottom right corner of bounding box
-                cv2.circle(canvas_state["annotated_frame"], (int(x2), int(y2)), 6, (0, 255, 70), -1)
+                cv2.circle(canvas_state["annotated_frame"], (int(x2), int(y2)), 8, (0, 255, 70), -1)
 
                 # save new vehicle
                 if detected_vehicles.get(track_id) is None:
