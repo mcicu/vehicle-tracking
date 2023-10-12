@@ -208,9 +208,14 @@ def main():
         k = cv2.waitKey(35) & 0xFF
         if k == 27 or k == ord("q") or k == ord("Q"):
             break
-        if k == ord(" "):  # if spacebar is pressed
+        if k == ord(" "):  # pause if spacebar is pressed
             canvas_state["is_paused"] = True
-            cv2.waitKey(0) & 0xFF  # program is paused indefinitely until a key is pressed
+            # compute partial results on pause
+            filename = video_path_without_extension + ".partial.csv"
+            compute_results_and_write_to_file(detected_vehicles, filename)
+
+            # program is paused indefinitely until a key is pressed
+            cv2.waitKey(0) & 0xFF
 
     # Release the video capture object and close the display window
     capture.release()
