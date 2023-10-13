@@ -1,3 +1,4 @@
+import sys
 import os
 import csv
 
@@ -93,14 +94,17 @@ def compute_results_and_write_to_file(detected_vehicles, filename):
         # write results sorted by vehicle total (descending)
         for k, v in sorted(result_per_direction.items(), key=lambda item: item[1]["total"], reverse=True):
             writer.writerow(v)
+    print("")
+    print("Results saved at video file location:")
+    print("==> " + filename)
 
 
-def main():
+def main(video_path_input=None):
     # Load the YOLOv8 model
     model = YOLO("yolov8n.pt")
 
     # Open the video file
-    video_path = "road.mp4"
+    video_path = video_path_input if video_path_input is not None else "road.mp4"
     capture = cv2.VideoCapture(video_path)
 
     video_path_without_extension = os.path.splitext(video_path)[0]
@@ -167,12 +171,13 @@ def main():
         canvas_state["annotated_frame"] = frame
         if results[0].boxes.id is not None:
             # Visualize the detected bounding boxes on the frame
-            canvas_state["annotated_frame"] = results[0].plot()
+            canvas_state["annotated_frame"] = results[0].plot(line_width=3)
 
             # Process detected vehicles in the current frame, and save/update info about them
             for x1, y1, x2, y2, track_id, score, vehicle_type_id in results[0].boxes.data.numpy():
-                # draw green dot on bottom right corner of bounding box
-                cv2.circle(canvas_state["annotated_frame"], (int(x2), int(y2)), 8, (0, 255, 70), -1)
+                # draw green dot on center of bottom edge of bounding box
+                point_of_interest = [int(x1 + (x2-x1) / 2), int(y2)]
+                cv2.circle(canvas_state["annotated_frame"], point_of_interest, 5, (0, 255, 70), -1)
 
                 # save new vehicle
                 if detected_vehicles.get(track_id) is None:
@@ -191,7 +196,7 @@ def main():
                 # check if vehicle is in a drawn area, and save the polygon id (index)
                 # note: we use (x2, y2) point (bottom right corner of bounding box) to check if it's in polygon
                 for area_index, area in enumerate(canvas_state["detection_areas"]):
-                    vehicle_in_area = cv2.pointPolygonTest(np.array(area["points"], np.int32), (x2, y2), False)
+                    vehicle_in_area = cv2.pointPolygonTest(np.array(area["points"], np.int32), point_of_interest, False)
                     if vehicle_in_area >= 0:  # -1 if outside, 0 if on edge, 1 if inside of polygon
                         detected_vehicles[track_id]["detected_in_areas"][area_index] = area_index
 
@@ -223,4 +228,5 @@ def main():
 
 
 # call main function
-main()
+video_path_input = sys.argv[1] if len(sys.argv) > 1 else None
+main(video_path_input)
