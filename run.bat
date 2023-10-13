@@ -1,0 +1,1 @@
+conda activate cicu-vehicle-tracking & python main.py %1
