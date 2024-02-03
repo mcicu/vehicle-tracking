@@ -12,3 +12,9 @@ conda env update --file environment.yml --prune
 
 # on windows: need to install opencv with pip:
 pip install opencv-python
+
+# to use GPU on macbook apple silicon, specify the 'mps' device
+results = model(source="input.mp4", show=True, conf=0.1, save=True, device='mps')
+
+# if there are MPS incompatibilities
+PYTORCH_ENABLE_MPS_FALLBACK=1
